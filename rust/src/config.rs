@@ -1,8 +1,33 @@
 use std::path::PathBuf;
 
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, Context};
 
+use crate::opts::ProjectorOpts;
 
+#[derive(Debug)]
+struct Config {
+    pub operation: Operation,
+    pub pwd: PathBuf,
+    pub config: PathBuf,
+}
+
+impl TryFrom<ProjectorOpts> for Config {
+    type Error = anyhow::Error;
+
+    fn try_from(value: ProjectorOpts) -> Result<Self> {
+        let operation = value.args.try_into()?;
+        let config = get_config(value.config)?;
+        let pwd = get_pwd(value.pwd)?;
+
+        Ok(Config {
+            operation,
+            config,
+            pwd,
+        })
+    }
+}
+
+#[derive(Debug)]
 pub enum Operation {
     Print(Option<String>),
     Add(String, String),
@@ -66,3 +91,13 @@ fn get_config(config: Option<PathBuf>) -> Result<PathBuf> {
 
     return Ok(loc);
 }
+
+fn get_pwd(pwd: Option<PathBuf>) -> Result<PathBuf> {
+    if let Some(pwd) = pwd {
+        return Ok(pwd);
+    }
+
+    Ok(std::env::current_dir().context("errored getting current directory")?)
+}
+
+

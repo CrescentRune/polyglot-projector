@@ -14,5 +14,5 @@ pub struct ProjectorOpts {
     pub config: Option<PathBuf>,
 
     #[clap(default_value = "")]
-    pub operation: Vec<String>,
+    pub args: Vec<String>,
 }
