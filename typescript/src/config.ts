@@ -1,6 +1,6 @@
 import { ProjectorOptions } from './opts';
 
-import path from "path";
+import * as path from "path";
 
 export enum Operation {
     Print,
@@ -48,9 +48,9 @@ function getOperation(opts: ProjectorOptions) {
         return Operation.Print;
     }
 
-    if (opts[0] === 'add') {
+    if (opts.args[0] === 'add') {
         return Operation.Add;
-    } else if (opts[0] === 'delete') {
+    } else if (opts.args[0] === 'delete') {
         return Operation.Remove;
     }
 
@@ -92,6 +92,7 @@ export default function config(opts: ProjectorOptions) {
         config: getConfig(opts),
         args: getArgs(opts),
         operation: getOperation(opts),
+    }
 }
 
 

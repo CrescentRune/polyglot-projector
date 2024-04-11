@@ -1,6 +1,6 @@
 
 use clap::Parser;
-use rust::opts::ProjectorOpts;
+use rust::{{opts::ProjectorOpts, config::Config}};
 
 use anyhow::Result;
 

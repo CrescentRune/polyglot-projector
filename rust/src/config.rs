@@ -5,7 +5,7 @@ use anyhow::{Result, anyhow, Context};
 use crate::opts::ProjectorOpts;
 
 #[derive(Debug)]
-struct Config {
+pub struct Config {
     pub operation: Operation,
     pub pwd: PathBuf,
     pub config: PathBuf,
@@ -27,7 +27,7 @@ impl TryFrom<ProjectorOpts> for Config {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Operation {
     Print(Option<String>),
     Add(String, String),
@@ -50,7 +50,7 @@ impl TryFrom<Vec<String>> for Operation {
                 return Err(err);
             }
 
-            let mut drain = value.drain(1..2);
+            let mut drain = value.drain(1..=2);
             return Ok(
                 Operation::Add(
                     drain.next().expect("to exist"),
@@ -100,4 +100,74 @@ fn get_pwd(pwd: Option<PathBuf>) -> Result<PathBuf> {
     Ok(std::env::current_dir().context("errored getting current directory")?)
 }
 
+#[cfg(test)]
+mod test {
+    use crate::{{opts::ProjectorOpts, config::Operation}};
+    use super::Config;
+    use anyhow::Result;
 
+
+    #[test] 
+    fn test_print_all() -> Result<()> {
+        let opts:Config = ProjectorOpts {
+            args: vec![],
+            pwd: None,
+            config: None,
+        }.try_into()?;
+
+        assert_eq!(opts.operation, Operation::Print(None));
+
+        Ok(())
+    }
+
+    #[test] 
+    fn test_print_key() -> Result<()> {
+        let opts:Config = ProjectorOpts {
+            args: vec![
+                String::from("foo")
+            ],
+            pwd: None,
+            config: None,
+        }.try_into()?;
+
+        assert_eq!(opts.operation, Operation::Print(Some(String::from("foo"))));
+
+        Ok(())
+    }
+
+    #[test] 
+    fn test_add_key_val() -> Result<()> {
+        let opts:Config = ProjectorOpts {
+            args: vec![
+                String::from("add"),
+                String::from("foo"),
+                String::from("bar"),
+            ],
+            pwd: None,
+            config: None,
+        }.try_into()?;
+
+        println!("{:?}", opts.operation);
+        assert_eq!(opts.operation, Operation::Add(String::from("foo"), String::from("bar")));
+
+        Ok(())
+    }
+
+    #[test] 
+    fn test_remove_key() -> Result<()> {
+        let opts:Config = ProjectorOpts {
+            args: vec![
+                String::from("delete"),
+                String::from("bar"),
+            ],
+            pwd: None,
+            config: None,
+        }.try_into()?;
+
+        assert_eq!(opts.operation, Operation::Remove(String::from("bar")));
+
+        Ok(())
+    }
+
+
+}
