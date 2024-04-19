@@ -86,9 +86,10 @@ impl Projector {
 
     pub fn remove_value(&mut self, key: &str) {
         self.data.projector
-            .entry(self.config.pwd.clone())
-            .or_default()
-            .remove(key);
+            .get_mut(&self.config.pwd)
+            .map(|x| {
+                x.remove(key);
+            });
     }
 }
 
